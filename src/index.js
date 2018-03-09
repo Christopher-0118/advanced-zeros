@@ -10,14 +10,32 @@ function isPrime(number) {
 	return true;
 }
 
-function getSimpleMultiplier(base) {
+function getDegreeDividers(arrOfMultiplaiers) {
+  let length = arrOfMultiplaiers.length;
+  let arrOfDevider = [[arrOfMultiplaiers[0], 1]];
+  let j = 0;
+
+  for (let i = 1; i < length; i++) {
+    if (arrOfDevider[j][0] === arrOfMultiplaiers[i]) {
+      arrOfDevider[j][1]++;
+    } else if (arrOfDevider[j][0] !== arrOfMultiplaiers[i]) {
+      j++;
+      arrOfDevider.push([arrOfMultiplaiers[i], 1]);
+    }
+  }
+return arrOfDevider;
+}
+
+
+function getDivider(base) {
   let divisible = base;
   let divider = 2;
   let arrOfMultiplaiers = [];
  
   if (isPrime(divisible)) {
     arrOfMultiplaiers.push(divisible);
-    return arrOfMultiplaiers;
+    arrOfMultiplaiers.push(1);
+    return [arrOfMultiplaiers];
   }
   while (divisible > 1) {
     if (divisible % divider !== 0) {
@@ -29,25 +47,26 @@ function getSimpleMultiplier(base) {
     }
     if (isPrime(divisible)) {
       arrOfMultiplaiers.push(divisible);
-      arrOfMultiplaiers.reverse();
-      while(arrOfMultiplaiers[arrOfMultiplaiers.length - 1] !== divisible) {
-        arrOfMultiplaiers.pop();
-      }
-      return arrOfMultiplaiers;
+      return getDegreeDividers(arrOfMultiplaiers);
     }
   }
 }
 
 module.exports = function getZerosCount(number, base) {
-  let baseAndDegree = getSimpleMultiplier(base);
-  let currentDevider = baseAndDegree[0];
-  let divider = baseAndDegree[0];
-  let maxDegree = Math.floor(Math.log(number) / Math.log(divider));
-  let zerosCount = 0;
+  let baseAndDegree = getDivider(base);
+  let result = [];
+  
+  for (let i = 0; i < baseAndDegree.length; i++) {
+    let divider = baseAndDegree[i][0];
+    let currentDevider = divider;
+    let maxDegree = Math.floor(Math.log(number) / Math.log(divider));
+    let zerosCount = 0;
 
-  for (let currentDegree = 1; currentDegree <= maxDegree; currentDegree++) {
-    zerosCount +=  Math.floor(number / currentDevider);
-    currentDevider = currentDevider * divider;
+    for (let currentDegree = 1; currentDegree <= maxDegree; currentDegree++) {
+      zerosCount +=  Math.floor(number / currentDevider);
+      currentDevider = currentDevider * divider;
+    }
+    result.push(Math.floor(zerosCount / baseAndDegree[i][1]));
   }
-  return Math.floor(zerosCount / baseAndDegree.length);
+  return Math.min.apply(null, result);
 }
